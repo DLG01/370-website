@@ -1,72 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Solar System Simulation — Minimal UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 2rem; }
+    .page { display: none; }
+    .page.active { display: block; }
+    form { display: grid; gap: .75rem; max-width: 420px; }
+    fieldset { border: 1px solid #ccc; padding: 1rem; border-radius: .5rem; }
+    legend { font-weight: 600; }
+    label { display: grid; grid-template-columns: 1fr auto; gap: .5rem; align-items: center; }
+    input[type="text"] { padding: .4rem .6rem; }
+    .row { display: grid; grid-template-columns: 1fr auto; gap: .5rem; }
+    .btn { padding: .5rem .8rem; cursor: pointer; }
+    .muted { color: #666; font-size: .9rem; }
+    .error { color: #b00020; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <!-- Main menu -->
+  <section id="page-home" class="page active" aria-label="Main Menu">
+    <h1>Main Menu</h1>
+    <button id="go-sim" class="btn">Go to Simulation Page</button>
+  </section>
 
-cin >> input; // if clicked or not to go to next page
+  <!-- Simulation page -->
+  <section id="page-sim" class="page" aria-label="Simulation Page">
+    <h1>Solar System Simulation</h1>
 
-if (input == true) {
-  return 0;
-}
+    <div class="muted">Enter numbers only. Invalid entries are rejected with a message.</div>
+    <div id="msg" class="error" role="alert" aria-live="polite"></div>
 
-// now on solar sustem page
-while (true){
-  cin >> input;  // input here is what the user clicks. Can be reset, mass, position, velocity or go back to the home page.
+    <form id="sim-form" onsubmit="return false">
+      <fieldset>
+        <legend>Controls</legend>
 
-  if (input == "reset"){   // if user clickes the reset buttom
-    mass = ; position = ; velocity =   // not sure what default will be so left it empty for now 
-  }
+        <div class="row">
+          <label>Mass (planet)
+            <input id="mass" type="text" inputmode="decimal" autocomplete="off" />
+          </label>
+          <button class="btn" data-action="mass">Apply</button>
+        </div>
 
-  else if (input == "mass") {
-    if (inNumeric(val)) adjustMass(stod(val));  // adjustMass is another part of the code by another team member
-    else cout << "only enter a valid number";
-    
-  else if (input == "position") {
-    if (inNumeric(val)) adjustposition(stod(val));  // adjustposition is another part of the code by another team member
-    else cout << "only enter a valid number";
-  }
-  
-  else if (input == "velocity") {
-    if (inNumeric(val)) adjustvelocity(stod(val));  // adjustvelocity is another part of the code by another team member
-    else cout << "only enter a valid number";
-  }
+        <div class="row">
+          <label>Position (planet)
+            <input id="position" type="text" inputmode="decimal" autocomplete="off" />
+          </label>
+          <button class="btn" data-action="position">Apply</button>
+        </div>
 
-  else if (input == "Homepage") {
-    break;
-  }
-  
-}
+        <div class="row">
+          <label>Velocity (planet)
+            <input id="velocity" type="text" inputmode="decimal" autocomplete="off" />
+          </label>
+          <button class="btn" data-action="velocity">Apply</button>
+        </div>
 
+        <div class="row">
+          <button id="reset" class="btn" type="button">Reset</button>
+          <span class="muted">Resets mass, position, velocity to defaults</span>
+        </div>
+      </fieldset>
 
-Based on this Pseudocode code from last assigment:
+      <div class="row" style="margin-top: .5rem;">
+        <button id="go-home" class="btn" type="button">Home Page</button>
+        <span></span>
+      </div>
+    </form>
+  </section>
 
+  <script>
+    // go to simulation page and Homepage"
+    const home = document.getElementById('page-home');
+    const sim  = document.getElementById('page-sim');
+    const msg  = document.getElementById('msg');
 
-UI —> main menu page to access simulation page.
+    document.getElementById('go-sim').addEventListener('click', () => {
+      home.classList.remove('active');
+      sim.classList.add('active');
+    });
+    document.getElementById('go-home').addEventListener('click', () => {
+      sim.classList.remove('active');
+      home.classList.add('active');
+      msg.textContent = '';
+    });
 
-Inputs: “go to simulation page” button.
-Outputs: Go to simulation page.
+    const DEFAULTS = { mass: 0, position: 0, velocity: 0 };
 
-If { user clicks “go to simulation page”
-   Then take user to simulation page
-}
+    // Helpers 
+    const isNumeric = (s) => s !== '' && isFinite(Number(s));
+    const getEl = (id) => document.getElementById(id);
 
-// on simulation page 
-//Inputs: “reset”, “mass”(for planet), “position”(for planet), “velocity” (for planet)button/options.
-//Outputs: reset options, change planets attributes.
+    // Buttons: mass / position / velocity 
+    document.getElementById('sim-form').addEventListener('click', (e) => {
+      const action = e.target?.dataset?.action;
+      if (!action) return;
 
-If { user clicks “reset button"
-Reset “mass”, ”position”,  and”velocity” options to default
-}
+      const input = getEl(action).value.trim();
 
-If { user changes “mass”
-Call function to adjust mass // function written by another team member
-///To add a case where user adds invalid input not using numerical values
-}
+      if (!isNumeric(input)) {
+        msg.textContent = 'Only enter a valid number';
+        return;
+      }
+      msg.textContent = '';
 
-If { user changes “position”
-Call function to adjust position // function written by another team member
-///To add a case where user adds invalid input not using numerical values
-}
+      const val = Number(input);
 
-If { user changes “velocity”
-Call function to adjust velocity // function written by another team member
-///To add a case where user adds invalid input not using numerical values
-}
+      // Call teammate code 
+      if (action === 'mass') {
+        if (typeof window.adjustMass === 'function') window.adjustMass(val);
+        else console.warn('adjustMass not implemented');
+      } else if (action === 'position') {
+        if (typeof window.adjustposition === 'function') window.adjustposition(val);
+        else console.warn('adjustposition not implemented');
+      } else if (action === 'velocity') {
+        if (typeof window.adjustvelocity === 'function') window.adjustvelocity(val);
+        else console.warn('adjustvelocity not implemented');
+      }
+    });
 
+    // ---- Reset
+    document.getElementById('reset').addEventListener('click', () => {
+      getEl('mass').value = DEFAULTS.mass;
+      getEl('position').value = DEFAULTS.position;
+      getEl('velocity').value = DEFAULTS.velocity;
+      msg.textContent = '';
+    });
 
+    getEl('mass').value = DEFAULTS.mass;
+    getEl('position').value = DEFAULTS.position;
+    getEl('velocity').value = DEFAULTS.velocity;
+  </script>
+</body>
+</html>
