@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Solar System Simulation — UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --title-size: clamp(2rem, 6vw, 4.2rem);
+      --btn-size: clamp(1rem, 2.5vw, 1.25rem);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: system-ui, Arial, sans-serif; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ---------- HOME (matches your picture) ---------- */
+    #page-home.hero {
+      position: relative;
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: #fff;
+      background: #0c1324 url("https://static-cdn.jtvnw.net/jtv_user_pictures/257fabdc-4a6f-4129-b8c4-d0d1a74adee8-profile_banner-480.jpeg") center / cover no-repeat fixed; /* <— put your image here */
+    }
+    #page-home .title {
+      font-weight: 600;
+      font-size: var(--title-size);
+      line-height: 1.15;
+      text-shadow: 0 6px 24px rgba(0,0,0,.45);
+      margin: 0 1rem 2rem;
+    }
+    #go-sim {
+      font-size: var(--btn-size);
+      padding: .9rem 1.25rem;
+      border: 0;
+      border-radius: .35rem;
+      background: rgba(240,240,240,.9);
+      color: #111;
+      box-shadow: 0 6px 18px rgba(0,0,0,.35);
+      cursor: pointer;
+    }
+    #go-sim:active { transform: translateY(1px); }
+
+    /* exit icon/label bottom-left */
+    .exit-wrap {
+      position: absolute;
+      left: 1.25rem;
+      bottom: 1rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: .5rem;
+      align-items: end;
+      color: #fff;
+      text-shadow: 0 4px 14px rgba(0,0,0,.6);
+      font-size: clamp(.95rem, 2vw, 1.2rem);
+      user-select: none;
+    }
+    .exit-emoji { font-size: clamp(2.2rem, 4vw, 3rem); line-height: 1; }
+    .exit-text { letter-spacing: .02em; }
+
+    /* ---------- SIMULATION PAGE (unchanged features) ---------- */
+    #page-sim { padding: 2rem; }
+    form { display: grid; gap: .75rem; max-width: 420px; }
+    fieldset { border: 1px solid #ccc; padding: 1rem; border-radius: .5rem; }
+    legend { font-weight: 600; }
+    label { display: grid; grid-template-columns: 1fr auto; gap: .5rem; align-items: center; }
+    input[type="text"] { padding: .4rem .6rem; }
+    .row { display: grid; grid-template-columns: 1fr auto; gap: .5rem; align-items: center; }
+    .btn { padding: .5rem .8rem; cursor: pointer; }
+    .muted { color: #666; font-size: .9rem; }
+    .error { color: #b00020; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <!-- HOME -->
+  <section id="page-home" class="page hero active" aria-label="Main Menu">
+    <div>
+      <h1 class="title">Welcome to the solar system simulation</h1>
+      <button id="go-sim">Click here to go to simulation</button>
+    </div>
+    <div class="exit-wrap" aria-hidden="true">
+      <div class="exit-emoji">🚪</div>
+      <div class="exit-text">exit</div>
+    </div>
+  </section>
+
+  <!-- SIMULATION PAGE -->
+  <section id="page-sim" class="page" aria-label="Simulation Page">
+    <h1>Solar System Simulation</h1>
+    <div class="muted">Enter numbers only. Invalid entries are rejected with a message.</div>
+    <div id="msg" class="error" role="alert" aria-live="polite"></div>
+
+    <form id="sim-form" onsubmit="return false">
+      <fieldset>
+        <legend>Controls</legend>
+
+        <div class="row">
+          <label>Mass (planet)
+            <input id="mass" type="text" inputmode="decimal" autocomplete="off" />
+          </label>
+          <button class="btn" data-action="mass">Apply</button>
+        </div>
+
+        <div class="row">
+          <label>Position (planet)
+            <input id="position" type="text" inputmode="decimal" autocomplete="off" />
+          </label>
+          <button class="btn" data-action="position">Apply</button>
+        </div>
+
+        <div class="row">
+          <label>Velocity (planet)
+            <input id="velocity" type="text" inputmode="decimal" autocomplete="off" />
+          </label>
+          <button class="btn" data-action="velocity">Apply</button>
+        </div>
+
+        <div class="row">
+          <button id="reset" class="btn" type="button">Reset</button>
+          <span class="muted">Resets mass, position, velocity to defaults</span>
+        </div>
+      </fieldset>
+
+      <div class="row" style="margin-top: .5rem;">
+        <button id="go-home" class="btn" type="button">Home Page</button>
+        <span></span>
+      </div>
+    </form>
+  </section>
+
+  <script>
+    // ---------- Routing ----------
+    const home = document.getElementById('page-home');
+    const sim  = document.getElementById('page-sim');
+    const msg  = document.getElementById('msg');
+
+    document.getElementById('go-sim').addEventListener('click', () => {
+      home.classList.remove('active');
+      sim.classList.add('active');
+    });
+    document.getElementById('go-home').addEventListener('click', () => {
+      sim.classList.remove('active');
+      home.classList.add('active');
+      msg.textContent = '';
+    });
+
+    // ---------- Defaults ----------
+    const DEFAULTS = { mass: 0, position: 0, velocity: 0 };
+
+    // ---------- Helpers ----------
+    const isNumeric = (s) => s !== '' && isFinite(Number(s));
+    const getEl = (id) => document.getElementById(id);
+
+    // ---------- Apply buttons ----------
+    document.getElementById('sim-form').addEventListener('click', (e) => {
+      const action = e.target?.dataset?.action;
+      if (!action) return;
+
+      const input = getEl(action).value.trim();
+      if (!isNumeric(input)) { msg.textContent = 'Only enter a valid number'; return; }
+      msg.textContent = '';
+      const val = Number(input);
+
+      if (action === 'mass') {
+        if (typeof window.adjustMass === 'function') window.adjustMass(val);
+        else console.warn('adjustMass not implemented');
+      } else if (action === 'position') {
+        if (typeof window.adjustposition === 'function') window.adjustposition(val);
+        else console.warn('adjustposition not implemented');
+      } else if (action === 'velocity') {
+        if (typeof window.adjustvelocity === 'function') window.adjustvelocity(val);
+        else console.warn('adjustvelocity not implemented');
+      }
+    });
+
+    // ---------- Reset ----------
+    document.getElementById('reset').addEventListener('click', () => {
+      getEl('mass').value = DEFAULTS.mass;
+      getEl('position').value = DEFAULTS.position;
+      getEl('velocity').value = DEFAULTS.velocity;
+      msg.textContent = '';
+    });
+
+    // Initialize inputs
+    getEl('mass').value = DEFAULTS.mass;
+    getEl('position').value = DEFAULTS.position;
+    getEl('velocity').value = DEFAULTS.velocity;
+  </script>
+</body>
+</html>
