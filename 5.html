@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Solar System Simulation — UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --title-size: clamp(2rem, 6vw, 4.2rem);
+      --btn-size: clamp(1rem, 2.5vw, 1.25rem);
+      --panel-bg: #5f5f5f;
+      --accent: #8c52ff;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: system-ui, Arial, sans-serif;
+    }
+
+    /* Pages */
+    .page { display: none; height: 100vh; }
+    .page.active { display: block; }
+
+    /* ---------- HOME ---------- */
+    #page-home.hero {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: #fff;
+      background: #0c1324 url("https://static-cdn.jtvnw.net/jtv_user_pictures/257fabdc-4a6f-4129-b8c4-d0d1a74adee8-profile_banner-480.jpeg")
+        center / cover no-repeat;
+    }
+    #page-home .title {
+      font-weight: 600;
+      font-size: var(--title-size);
+      line-height: 1.15;
+      text-shadow: 0 6px 24px rgba(0,0,0,.45);
+      margin: 0 1rem 2rem;
+    }
+    #go-sim {
+      font-size: var(--btn-size);
+      padding: .9rem 1.25rem;
+      border: 0;
+      border-radius: .35rem;
+      background: rgba(240,240,240,.9);
+      color: #111;
+      box-shadow: 0 6px 18px rgba(0,0,0,.35);
+      cursor: pointer;
+    }
+    #go-sim:active { transform: translateY(1px); }
+
+    .exit-wrap {
+      position: absolute;
+      left: 1.25rem;
+      bottom: 1rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: .5rem;
+      align-items: end;
+      color: #fff;
+      text-shadow: 0 4px 14px rgba(0,0,0,.6);
+      font-size: clamp(.95rem, 2vw, 1.2rem);
+      user-select: none;
+    }
+    .exit-emoji { font-size: clamp(2.2rem, 4vw, 3rem); line-height: 1; }
+    .exit-text { letter-spacing: .02em; }
+
+    /* ---------- SIMULATION ---------- */
+    #page-sim {
+      display: flex;
+      height: 100vh;
+      background-color: #0d0d0d;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .sim-display {
+      flex: 2;
+      background: url("https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcR-dFMSOey4QsSWU0pMAgj-PPIWEcYla2e4KD0yYRFXFEJkxP68")
+        center / cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 4px solid #444;
+    }
+
+    .sim-panel {
+      flex: 1;
+      background: var(--panel-bg);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow: hidden;
+    }
+
+    .panel-title {
+      font-weight: 600;
+      font-size: 1.5rem;
+      margin-bottom: .5rem;
+    }
+
+    .panel-scroll {
+      overflow: auto;
+      padding-right: .25rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    #msg { color: #ffb3b3; font-size: .9rem; min-height: 1.2em; }
+
+    .control { display: grid; gap: .4rem; }
+    .control label { font-size: 1.1rem; }
+    .control input[type="text"] {
+      padding: .5rem .6rem;
+      border: none;
+      border-radius: .3rem;
+    }
+    .control input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .btn {
+      padding: .6rem 1rem;
+      border: none;
+      border-radius: .3rem;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+      justify-self: start;
+    }
+    #reset { background: #d32f2f; }
+    #go-home { background: #333; }
+
+    .panel-actions {
+      position: sticky;
+      bottom: 0;
+      padding-top: 1rem;
+      background: var(--panel-bg);
+      display: flex;
+      gap: .75rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- HOME -->
+  <section id="page-home" class="page hero active" aria-label="Main Menu">
+    <div>
+      <h1 class="title">Welcome to the solar system simulation</h1>
+      <button id="go-sim" type="button">Click here to go to simulation</button>
+    </div>
+    <div class="exit-wrap" aria-hidden="true">
+      <div class="exit-emoji">🚪</div>
+      <div class="exit-text">exit</div>
+    </div>
+  </section>
+
+  <!-- SIMULATION -->
+  <section id="page-sim" class="page" aria-label="Simulation Page">
+    <div class="sim-display">
+      <h2 style="font-weight:400; opacity:.7;">Simulation Canvas Placeholder</h2>
+    </div>
+
+    <div class="sim-panel">
+      <div class="panel-title">Planet Attributes</div>
+
+      <div class="panel-scroll">
+        <div id="msg"></div>
+
+        <div class="control">
+          <label>Mass:</label>
+          <input id="mass" type="text" inputmode="decimal" autocomplete="off" placeholder="Value">
+          <input type="range" min="0" max="100" value="0" id="massRange">
+          <button class="btn" data-action="mass">Apply</button>
+        </div>
+
+        <div class="control">
+          <label>Position:</label>
+          <input id="position" type="text" inputmode="decimal" autocomplete="off" placeholder="Value">
+          <input type="range" min="0" max="100" value="0" id="positionRange">
+          <button class="btn" data-action="position">Apply</button>
+        </div>
+
+        <div class="control">
+          <label>Velocity:</label>
+          <input id="velocity" type="text" inputmode="decimal" autocomplete="off" placeholder="Value">
+          <input type="range" min="0" max="100" value="0" id="velocityRange">
+          <button class="btn" data-action="velocity">Apply</button>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <button id="reset" class="btn" type="button">Reset</button>
+        <button id="go-home" class="btn" type="button">Home Page</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const home = document.getElementById('page-home');
+      const sim  = document.getElementById('page-sim');
+      const msg  = document.getElementById('msg');
+
+      // navigation
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('#go-sim')) {
+          e.preventDefault();
+          home.classList.remove('active');
+          sim.classList.add('active');
+        }
+        if (e.target.closest('#go-home')) {
+          e.preventDefault();
+          sim.classList.remove('active');
+          home.classList.add('active');
+        }
+      });
+
+      // numeric validation + stubs
+      const isNum = s => s !== '' && isFinite(Number(s));
+      const get = id => document.getElementById(id);
+      document.querySelector('.sim-panel').addEventListener('click', (e) => {
+        const action = e.target?.dataset?.action;
+        if (!action) return;
+        const v = get(action).value.trim();
+        if (!isNum(v)) { msg.textContent = 'Only enter a valid number'; return; }
+        msg.textContent = '';
+        console.log(`Adjust ${action} →`, Number(v));
+      });
+
+      // reset
+      const DEFAULTS = { mass: 0, position: 0, velocity: 0 };
+      document.getElementById('reset').addEventListener('click', () => {
+        get('mass').value = DEFAULTS.mass;
+        get('position').value = DEFAULTS.position;
+        get('velocity').value = DEFAULTS.velocity;
+        msg.textContent = '';
+      });
+    });
+  </script>
+</body>
+</html>
