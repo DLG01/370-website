@@ -15,7 +15,7 @@
     .page { display: none; }
     .page.active { display: block; }
 
-    /* ---------- HOME (as before) ---------- */
+    /* HOME  */
     #page-home.hero {
       position: relative;
       min-height: 100%;
@@ -23,7 +23,7 @@
       place-items: center;
       text-align: center;
       color: #fff;
-      background: #0c1324 url("Screenshot 2025-10-20 at 3.58.04 PM.png") center / cover no-repeat fixed;
+      background: #0c1324 url("https://static-cdn.jtvnw.net/jtv_user_pictures/257fabdc-4a6f-4129-b8c4-d0d1a74adee8-profile_banner-480.jpeg") center / cover no-repeat fixed;
     }
     #page-home .title {
       font-weight: 600;
@@ -59,7 +59,7 @@
     .exit-emoji { font-size: clamp(2.2rem, 4vw, 3rem); line-height: 1; }
     .exit-text { letter-spacing: .02em; }
 
-    /* ---------- SIMULATION PAGE ---------- */
+    /*  SIMULATION PAGE  */
     #page-sim {
       display: flex;
       height: 100vh;
@@ -156,7 +156,7 @@
   <section id="page-sim" class="page" aria-label="Simulation Page">
     <div class="sim-display">
       <!-- placeholder orbit area -->
-      <h2 style="font-weight:400; opacity:0.7;">Simulation Canvas Placeholder</h2>
+      <h2 style="font-weight:400; opacity:0.7;">(Simulation Canvas Placeholder)</h2>
     </div>
 
     <div class="sim-panel">
@@ -190,7 +190,7 @@
   </section>
 
   <script>
-    // ---------- Routing ----------
+    //  Routing 
     const home = document.getElementById('page-home');
     const sim  = document.getElementById('page-sim');
     const msg  = document.getElementById('msg');
@@ -205,13 +205,13 @@
       msg.textContent = '';
     });
 
-    // ---------- Defaults ----------
+    //  Defaults 
     const DEFAULTS = { mass: 0, position: 0, velocity: 0 };
 
     const isNumeric = (s) => s !== '' && isFinite(Number(s));
     const getEl = (id) => document.getElementById(id);
 
-    // ---------- Apply Buttons ----------
+    //  Apply Buttons 
     document.querySelector('.sim-panel').addEventListener('click', (e) => {
       const action = e.target?.dataset?.action;
       if (!action) return;
@@ -222,7 +222,7 @@
       console.log(`Adjust ${action} to`, val);
     });
 
-    // ---------- Reset ----------
+    //  Reset 
     document.getElementById('reset').addEventListener('click', () => {
       getEl('mass').value = DEFAULTS.mass;
       getEl('position').value = DEFAULTS.position;
